@@ -5636,3 +5636,6 @@ fn header_constraints_uint64() {
     let results = scanner.scan(b"\0\0\0\0\0\0\0\0\0\0foox bary").unwrap();
     assert_eq!(results.matching_rules().len(), 0);
 }
+
+mod sliding_window;
+mod within;
