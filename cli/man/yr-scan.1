@@ -4,7 +4,7 @@
 .SH NAME
 yr\-scan \- Scan a file or directory
 .SH SYNOPSIS
-\fByr scan\fR [\fB\-C\fR|\fB\-\-compiled\-rules\fR] [\fB\-c\fR|\fB\-\-count\fR] [\fB\-\-cpu\-limit\fR] [\fB\-d\fR|\fB\-\-define\fR] [\fB\-\-disable\-console\-logs\fR] [\fB\-w\fR|\fB\-\-disable\-warnings\fR] [\fB\-\-exclude\fR] [\fB\-f\fR|\fB\-\-fast\-scan\fR] [\fB\-\-ignore\-invalid\-rules\fR] [\fB\-I\fR|\fB\-\-ignore\-module\fR] [\fB\-\-include\-dir\fR] [\fB\-\-max\-matches\-per\-pattern\fR] [\fB\-x\fR|\fB\-\-module\-data\fR] [\fB\-n\fR|\fB\-\-negate\fR] [\fB\-\-no\-mmap\fR] [\fB\-o\fR|\fB\-\-output\-format\fR] [\fB\-\-path\-as\-namespace\fR] [\fB\-m\fR|\fB\-\-print\-meta\fR] [\fB\-e\fR|\fB\-\-print\-namespace\fR] [\fB\-s\fR|\fB\-\-print\-strings\fR] [\fB\-g\fR|\fB\-\-print\-tags\fR] [\fB\-\-profiling\fR] [\fB\-r\fR|\fB\-\-recursive\fR] [\fB\-\-relaxed\-re\-syntax\fR] [\fB\-\-scan\-list\fR] [\fB\-z\fR|\fB\-\-skip\-larger\fR] [\fB\-t\fR|\fB\-\-tag\fR] [\fB\-p\fR|\fB\-\-threads\fR] [\fB\-a\fR|\fB\-\-timeout\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fI[NAMESPACE:]RULES_PATH\fR> <\fITARGET_PATH\fR>
+\fByr scan\fR [\fB\-C\fR|\fB\-\-compiled\-rules\fR] [\fB\-c\fR|\fB\-\-count\fR] [\fB\-\-cpu\-limit\fR] [\fB\-d\fR|\fB\-\-define\fR] [\fB\-\-disable\-console\-logs\fR] [\fB\-w\fR|\fB\-\-disable\-warnings\fR] [\fB\-\-exclude\fR] [\fB\-f\fR|\fB\-\-fast\-scan\fR] [\fB\-\-ignore\-invalid\-rules\fR] [\fB\-I\fR|\fB\-\-ignore\-module\fR] [\fB\-\-include\-dir\fR] [\fB\-\-max\-matches\-per\-pattern\fR] [\fB\-x\fR|\fB\-\-module\-data\fR] [\fB\-n\fR|\fB\-\-negate\fR] [\fB\-\-no\-mmap\fR] [\fB\-o\fR|\fB\-\-output\-format\fR] [\fB\-\-path\-as\-namespace\fR] [\fB\-m\fR|\fB\-\-print\-meta\fR] [\fB\-e\fR|\fB\-\-print\-namespace\fR] [\fB\-s\fR|\fB\-\-print\-strings\fR] [\fB\-g\fR|\fB\-\-print\-tags\fR] [\fB\-\-profiling\fR] [\fB\-r\fR|\fB\-\-recursive\fR] [\fB\-\-relaxed\-re\-syntax\fR] [\fB\-\-scan\-list\fR] [\fB\-\-sliding\-window\fR] [\fB\-\-window\-overlap\fR] [\fB\-z\fR|\fB\-\-skip\-larger\fR] [\fB\-t\fR|\fB\-\-tag\fR] [\fB\-p\fR|\fB\-\-threads\fR] [\fB\-a\fR|\fB\-\-timeout\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fI[NAMESPACE:]RULES_PATH\fR> <\fITARGET_PATH\fR>
 .SH DESCRIPTION
 Scan a file or directory
 .PP
@@ -243,6 +243,28 @@ Indicate that TARGET_PATH is a file containing the paths to be scanned
 <TARGET_PATH> must be a text file containing one path per line, or `\-` to read
 paths from standard input until EOF. The paths must be either absolute paths,
 or relative to the current directory.
+.TP
+\fB\-\-sliding\-window\fR \fI<BYTES>\fR
+Evaluate rules in overlapping windows of the given size
+
+Each window is evaluated as if it were the whole file, so a rule only matches
+when all the patterns it needs are within one window. This avoids false
+positives in large inputs with many unrelated pieces of data, like memory
+dumps, where the patterns of a rule may appear far away from each other.
+
+Patterns are searched only once. In each window, offsets are relative to the
+window start, `filesize` is the window size, and functions like `uint16(0)`
+read from the window. Modules like `pe` still parse the whole file. Reported
+matches are those in the windows where the rule matched, with offsets relative
+to the start of the file. Files not larger than the window are scanned as usual.
+
+Requires \-\-window\-overlap. Example: \-\-sliding\-window 1048576 \-\-window\-overlap 65536
+.TP
+\fB\-\-window\-overlap\fR \fI<BYTES>\fR
+Overlap between consecutive windows, in bytes
+
+Any group of matches that spans at most this many bytes falls completely within
+some window, so it is always found. Must be smaller than \-\-sliding\-window.
 .TP
 \fB\-z\fR, \fB\-\-skip\-larger\fR \fI<FILE_SIZE>\fR
 Skip files larger than the given size

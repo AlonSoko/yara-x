@@ -241,6 +241,25 @@ impl MatchList {
     pub fn search(&self, offset: usize) -> Result<usize, usize> {
         self.matches.binary_search_by(|m| m.range.start.cmp(&offset))
     }
+
+    /// Returns the matches that lie completely inside `window` (they start
+    /// at or after `window.start` and end at or before `window.end`).
+    ///
+    /// This is O(log(N) + M), where M is the number of matches that start
+    /// inside the window.
+    pub fn within(
+        &self,
+        window: Range<usize>,
+    ) -> impl Iterator<Item = &Match> + '_ {
+        let first = match self.search(window.start) {
+            Ok(index) | Err(index) => index,
+        };
+        let end = window.end;
+        self.matches[first..]
+            .iter()
+            .take_while(move |m| m.range.start < end)
+            .filter(move |m| m.range.end <= end)
+    }
 }
 
 impl<'a> IntoIterator for &'a MatchList {
@@ -447,6 +466,16 @@ impl PatternMatches {
         }
     }
 
+    /// Creates a new, empty [`PatternMatches`] with the same maximum number
+    /// of matches per pattern as `self`.
+    pub fn new_like(&self) -> Self {
+        Self {
+            matches: FxHashMap::default(),
+            max_matches_per_pattern: self.max_matches_per_pattern,
+            capacity: 0,
+        }
+    }
+
     /// Sets the maximum number of matches per pattern.
     ///
     /// The default value is [`Self::DEFAULT_MAX_MATCHES_PER_PATTERN`].
@@ -463,6 +492,13 @@ impl PatternMatches {
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.matches.is_empty()
+    }
+
+    /// Returns an iterator over the patterns and their lists of matches.
+    pub fn matches_per_pattern(
+        &self,
+    ) -> impl Iterator<Item = (&PatternId, &MatchList)> {
+        self.matches.iter()
     }
 
     /// Clears the matches for all patterns.
