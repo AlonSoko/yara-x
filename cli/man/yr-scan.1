@@ -4,7 +4,7 @@
 .SH NAME
 yr\-scan \- Scan a file or directory
 .SH SYNOPSIS
-\fByr scan\fR [\fB\-C\fR|\fB\-\-compiled\-rules\fR] [\fB\-c\fR|\fB\-\-count\fR] [\fB\-\-cpu\-limit\fR] [\fB\-d\fR|\fB\-\-define\fR] [\fB\-\-disable\-console\-logs\fR] [\fB\-w\fR|\fB\-\-disable\-warnings\fR] [\fB\-\-exclude\fR] [\fB\-f\fR|\fB\-\-fast\-scan\fR] [\fB\-\-ignore\-invalid\-rules\fR] [\fB\-I\fR|\fB\-\-ignore\-module\fR] [\fB\-\-include\-dir\fR] [\fB\-\-max\-matches\-per\-pattern\fR] [\fB\-x\fR|\fB\-\-module\-data\fR] [\fB\-n\fR|\fB\-\-negate\fR] [\fB\-\-no\-mmap\fR] [\fB\-o\fR|\fB\-\-output\-format\fR] [\fB\-\-path\-as\-namespace\fR] [\fB\-m\fR|\fB\-\-print\-meta\fR] [\fB\-e\fR|\fB\-\-print\-namespace\fR] [\fB\-s\fR|\fB\-\-print\-strings\fR] [\fB\-g\fR|\fB\-\-print\-tags\fR] [\fB\-\-profiling\fR] [\fB\-r\fR|\fB\-\-recursive\fR] [\fB\-\-relaxed\-re\-syntax\fR] [\fB\-\-scan\-list\fR] [\fB\-\-sliding\-window\fR] [\fB\-\-window\-overlap\fR] [\fB\-z\fR|\fB\-\-skip\-larger\fR] [\fB\-t\fR|\fB\-\-tag\fR] [\fB\-p\fR|\fB\-\-threads\fR] [\fB\-a\fR|\fB\-\-timeout\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fI[NAMESPACE:]RULES_PATH\fR> <\fITARGET_PATH\fR>
+\fByr scan\fR [\fB\-C\fR|\fB\-\-compiled\-rules\fR] [\fB\-c\fR|\fB\-\-count\fR] [\fB\-\-cpu\-limit\fR] [\fB\-d\fR|\fB\-\-define\fR] [\fB\-\-disable\-console\-logs\fR] [\fB\-w\fR|\fB\-\-disable\-warnings\fR] [\fB\-\-exclude\fR] [\fB\-f\fR|\fB\-\-fast\-scan\fR] [\fB\-\-ignore\-invalid\-rules\fR] [\fB\-I\fR|\fB\-\-ignore\-module\fR] [\fB\-\-include\-dir\fR] [\fB\-\-max\-matches\-per\-pattern\fR] [\fB\-x\fR|\fB\-\-module\-data\fR] [\fB\-n\fR|\fB\-\-negate\fR] [\fB\-\-no\-mmap\fR] [\fB\-o\fR|\fB\-\-output\-format\fR] [\fB\-\-path\-as\-namespace\fR] [\fB\-m\fR|\fB\-\-print\-meta\fR] [\fB\-e\fR|\fB\-\-print\-namespace\fR] [\fB\-s\fR|\fB\-\-print\-strings\fR] [\fB\-\-print\-windows\fR] [\fB\-g\fR|\fB\-\-print\-tags\fR] [\fB\-\-profiling\fR] [\fB\-r\fR|\fB\-\-recursive\fR] [\fB\-\-relaxed\-re\-syntax\fR] [\fB\-\-scan\-list\fR] [\fB\-\-sliding\-window\fR] [\fB\-\-window\-overlap\fR] [\fB\-z\fR|\fB\-\-skip\-larger\fR] [\fB\-t\fR|\fB\-\-tag\fR] [\fB\-p\fR|\fB\-\-threads\fR] [\fB\-a\fR|\fB\-\-timeout\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fI[NAMESPACE:]RULES_PATH\fR> <\fITARGET_PATH\fR>
 .SH DESCRIPTION
 Scan a file or directory
 .PP
@@ -205,6 +205,14 @@ Examples:
 \-\-print\-strings
 \-\-print\-strings=50
 .fi
+.TP
+\fB\-\-print\-windows\fR
+Print the windows where each rule matched (requires \-\-sliding\-window)
+
+For each matching rule, prints the ranges of the file covered by the windows
+where the rule matched. Windows that overlap or touch each other are merged
+into a single range. Offsets are relative to the start of the file. Nothing is
+printed for files that fit in a single window.
 .TP
 \fB\-g\fR, \fB\-\-print\-tags\fR
 Print rule tags
